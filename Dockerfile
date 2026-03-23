@@ -5,7 +5,7 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # 3️⃣ Copiamos todo el proyecto
-COPY . .
+COPY src/main/kotlin/com/diana/ComTec/config .
 
 # 4️⃣ Damos permisos al wrapper de Gradle
 RUN chmod +x ./gradlew
