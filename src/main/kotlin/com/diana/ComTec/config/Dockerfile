@@ -17,4 +17,4 @@ RUN ./gradlew bootJar
 EXPOSE 8080
 
 # 7️⃣ Comando para arrancar Spring Boot
-CMD ["java", "-jar", "build/libs/ComTec-0.0.1-SNAPSHOT.jar"]
+CMD ["sh", "-c", "java -jar build/libs/*.jar"]
