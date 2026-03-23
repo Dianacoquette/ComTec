@@ -42,44 +42,56 @@ async function cargarUsuarios(page = 0, buscar = '') {
 
         // ── Filas (DOM) ─────────────────────────────
         tablaUsuario.innerHTML = content.length === 0
-            ? `<tr><td colspan="7" class="text-center py-4 text-muted">
-                   <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
-               </td></tr>`
-            : content.map((u, i) => `
-                <tr>
-                    <td>${currentPage * 5 + i + 1}</td>
-                    <td>
-                        <img src="${u.strImagen
-                            ? '/uploads/usuarios/' + u.strImagen
-                            : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-                             alt="foto"
-                             class="rounded-circle"
-                             style="width:40px;height:40px;object-fit:cover;">
-                    </td>
-                    <td>${escapeHtml(u.strNombreUsuario)}</td>
-                    <td>${escapeHtml(u.strNombrePerfil)}</td>
-                    <td>${u.strCorreo ? escapeHtml(u.strCorreo) : '<span class="text-muted">—</span>'}</td>
-                    <td>
-                        <span class="badge ${u.strEstado === 'Activo' ? 'bg-success' : 'bg-danger'}">
-                            ${escapeHtml(u.strEstado)}
-                        </span>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-info btn-sm btn-action"
-                                onclick="verDetalle(${u.id})" title="Detalle">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <a href="/seguridad/usuario/editar/${u.id}"
-                           class="btn btn-warning btn-sm btn-action" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm btn-action"
-                                onclick="confirmarEliminar(${u.id},'${escapeHtml(u.strNombreUsuario)}')"
-                                title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`).join('');
+    ? `<tr><td colspan="7" class="text-center py-4 text-muted">
+           <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
+       </td></tr>`
+    : content.map((u, i) => {
+
+        const btnDetalle = PERM.detalle
+            ? `<button class="btn btn-info btn-sm btn-action"
+                       onclick="verDetalle(${u.id})" title="Detalle">
+                   <i class="fas fa-eye"></i>
+               </button>` : '';
+
+        const btnEditar = PERM.editar
+            ? `<a href="/seguridad/usuario/editar/${u.id}"
+                  class="btn btn-warning btn-sm btn-action" title="Editar">
+                   <i class="fas fa-edit"></i>
+               </a>` : '';
+
+        const btnEliminar = PERM.eliminar
+            ? `<button class="btn btn-danger btn-sm btn-action"
+                       onclick="confirmarEliminar(${u.id},'${escapeHtml(u.strNombreUsuario)}')"
+                       title="Eliminar">
+                   <i class="fas fa-trash"></i>
+               </button>` : '';
+
+        return `
+            <tr>
+                <td>${currentPage * 5 + i + 1}</td>
+                <td>
+                    <img src="${u.strImagen
+                        ? '/uploads/usuarios/' + u.strImagen
+                        : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+                         alt="foto"
+                         class="rounded-circle"
+                         style="width:40px;height:40px;object-fit:cover;">
+                </td>
+                <td>${escapeHtml(u.strNombreUsuario)}</td>
+                <td>${escapeHtml(u.strNombrePerfil)}</td>
+                <td>${u.strCorreo ? escapeHtml(u.strCorreo) : '<span class="text-muted">—</span>'}</td>
+                <td>
+                    <span class="badge ${u.strEstado === 'Activo' ? 'bg-success' : 'bg-danger'}">
+                        ${escapeHtml(u.strEstado)}
+                    </span>
+                </td>
+                <td class="text-center">
+                    ${btnDetalle}
+                    ${btnEditar}
+                    ${btnEliminar}
+                </td>
+            </tr>`;
+    }).join('');
 
         infoRegistros.textContent =
             `Mostrando ${content.length} de ${totalElements} registro(s)`;

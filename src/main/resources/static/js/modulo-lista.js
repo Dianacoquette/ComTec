@@ -44,30 +44,41 @@ async function cargarModulos(page = 0, buscar = '') {
 
         // ── Filas (DOM) ─────────────────────────────
         tablaModulo.innerHTML = content.length === 0
-            ? `<tr><td colspan="3" class="text-center py-4 text-muted">
-                   <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
-               </td></tr>`
-            : content.map((m, i) => `
-                <tr>
-                    <td>${currentPage * 5 + i + 1}</td>
-                    <td>${escapeHtml(m.strNombreModulo)}</td>
-                    <td class="text-center">
-                        <button class="btn btn-info btn-sm btn-action"
-                                onclick="verDetalle(${m.id})" title="Detalle">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <a href="/seguridad/modulo/editar/${m.id}"
-                           class="btn btn-warning btn-sm btn-action" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm btn-action"
-                                onclick="confirmarEliminar(${m.id},'${escapeHtml(m.strNombreModulo)}')"
-                                title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`).join('');
+    ? `<tr><td colspan="3" class="text-center py-4 text-muted">
+           <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
+       </td></tr>`
+    : content.map((m, i) => {
 
+        const btnDetalle = PERM.detalle
+            ? `<button class="btn btn-info btn-sm btn-action"
+                       onclick="verDetalle(${m.id})" title="Detalle">
+                   <i class="fas fa-eye"></i>
+               </button>` : '';
+
+        const btnEditar = PERM.editar
+            ? `<a href="/seguridad/modulo/editar/${m.id}"
+                  class="btn btn-warning btn-sm btn-action" title="Editar">
+                   <i class="fas fa-edit"></i>
+               </a>` : '';
+
+        const btnEliminar = PERM.eliminar
+            ? `<button class="btn btn-danger btn-sm btn-action"
+                       onclick="confirmarEliminar(${m.id},'${escapeHtml(m.strNombreModulo)}')"
+                       title="Eliminar">
+                   <i class="fas fa-trash"></i>
+               </button>` : '';
+
+        return `
+            <tr>
+                <td>${currentPage * 5 + i + 1}</td>
+                <td>${escapeHtml(m.strNombreModulo)}</td>
+                <td class="text-center">
+                    ${btnDetalle}
+                    ${btnEditar}
+                    ${btnEliminar}
+                </td>
+            </tr>`;
+    }).join('');
         infoRegistros.textContent =
             `Mostrando ${content.length} de ${totalElements} registro(s)`;
         renderPaginacion(currentPage, totalPages);

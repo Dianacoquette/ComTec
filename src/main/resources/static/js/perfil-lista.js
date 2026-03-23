@@ -44,35 +44,47 @@ async function cargarPerfiles(page = 0, buscar = '') {
         const { content, totalPages, totalElements, currentPage } = result.data;
 
         // ── Filas (DOM) ─────────────────────────────
-        tablaPerfil.innerHTML = content.length === 0
-            ? `<tr><td colspan="4" class="text-center py-4 text-muted">
-                   <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
-               </td></tr>`
-            : content.map((p, i) => `
-                <tr>
-                    <td>${currentPage * 5 + i + 1}</td>
-                    <td>${escapeHtml(p.strNombrePerfil)}</td>
-                    <td>
-                        <span class="badge ${p.bitAdministrador ? 'bg-success' : 'bg-secondary'}">
-                            ${p.bitAdministrador ? 'Sí' : 'No'}
-                        </span>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-info btn-sm btn-action"
-                                onclick="verDetalle(${p.id})" title="Detalle">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <a href="/seguridad/perfil/editar/${p.id}"
-                           class="btn btn-warning btn-sm btn-action" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm btn-action"
-                                onclick="confirmarEliminar(${p.id},'${escapeHtml(p.strNombrePerfil)}')"
-                                title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`).join('');
+       tablaPerfil.innerHTML = content.length === 0
+    ? `<tr><td colspan="4" class="text-center py-4 text-muted">
+           <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
+       </td></tr>`
+    : content.map((p, i) => {
+
+        const btnDetalle = PERM.detalle
+            ? `<button class="btn btn-info btn-sm btn-action"
+                       onclick="verDetalle(${p.id})" title="Detalle">
+                   <i class="fas fa-eye"></i>
+               </button>` : '';
+
+        const btnEditar = PERM.editar
+            ? `<a href="/seguridad/perfil/editar/${p.id}"
+                  class="btn btn-warning btn-sm btn-action" title="Editar">
+                   <i class="fas fa-edit"></i>
+               </a>` : '';
+
+        const btnEliminar = PERM.eliminar
+            ? `<button class="btn btn-danger btn-sm btn-action"
+                       onclick="confirmarEliminar(${p.id},'${escapeHtml(p.strNombrePerfil)}')"
+                       title="Eliminar">
+                   <i class="fas fa-trash"></i>
+               </button>` : '';
+
+        return `
+            <tr>
+                <td>${currentPage * 5 + i + 1}</td>
+                <td>${escapeHtml(p.strNombrePerfil)}</td>
+                <td>
+                    <span class="badge ${p.bitAdministrador ? 'bg-success' : 'bg-secondary'}">
+                        ${p.bitAdministrador ? 'Sí' : 'No'}
+                    </span>
+                </td>
+                <td class="text-center">
+                    ${btnDetalle}
+                    ${btnEditar}
+                    ${btnEliminar}
+                </td>
+            </tr>`;
+    }).join('');
 
         // ── Info y paginación (DOM) ─────────────────
         infoRegistros.textContent =

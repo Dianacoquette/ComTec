@@ -1,20 +1,18 @@
-# 1️⃣ Imagen base con Java 21
+# Build
+FROM gradle:8.5-jdk21 AS build
+
+WORKDIR /app
+COPY . .
+
+RUN gradle bootJar --no-daemon
+
+# Run
 FROM eclipse-temurin:21-jdk
 
-# 2️⃣ Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# 3️⃣ Copiamos todo el proyecto
-COPY src/main/kotlin/com/diana/ComTec/config .
+COPY --from=build /app/build/libs/*.jar app.jar
 
-# 4️⃣ Damos permisos al wrapper de Gradle
-RUN chmod +x ./gradlew
-
-# 5️⃣ Compilamos la app (crea el .jar)
-RUN ./gradlew bootJar
-
-# 6️⃣ Puerto que Render usará
 EXPOSE 8080
 
-# 7️⃣ Comando para arrancar Spring Boot
-CMD ["sh", "-c", "java -jar build/libs/*.jar"]
+CMD ["java", "-jar", "app.jar"]
