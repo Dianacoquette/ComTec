@@ -1,6 +1,5 @@
-// ╔══════════════════════════════════════════════════╗
-// ║       MÓDULO LISTA - Fetch API + DOM             ║
-// ╚══════════════════════════════════════════════════╝
+
+// ║       MÓDULO LISTA - Fetch API + DOM            
 
 // ── Referencias DOM ──────────────────────────────────
 const tablaModulo          = document.getElementById('tablaModulo');
@@ -19,9 +18,8 @@ let paginaActual    = 0;
 let terminoBusqueda = '';
 let idEliminar      = null;
 
-// ══════════════════════════════════════════════════════
+
 // FETCH API - Cargar tabla
-// ══════════════════════════════════════════════════════
 async function cargarModulos(page = 0, buscar = '') {
     paginaActual    = page;
     terminoBusqueda = buscar;
@@ -91,9 +89,9 @@ async function cargarModulos(page = 0, buscar = '') {
     }
 }
 
-// ══════════════════════════════════════════════════════
+
 // DOM - Paginación « ‹ 1 2 3 › »
-// ══════════════════════════════════════════════════════
+
 function renderPaginacion(currentPage, totalPages) {
     if (totalPages <= 1) { paginacion.innerHTML = ''; return; }
 

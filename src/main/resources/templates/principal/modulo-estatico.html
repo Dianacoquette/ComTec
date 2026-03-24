@@ -22,52 +22,6 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-
-                    <!-- ── Seguridad (dinámico) ── -->
-                    <li class="nav-item dropdown" th:if="${permisos != null and !permisos.empty}">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-shield-alt me-1"></i>Seguridad
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li th:each="p : ${permisos}">
-                                <a class="dropdown-item" th:href="${rutasModulo[p.modulo.strNombreModulo]}">
-                                    <i th:class="${p.modulo.strNombreModulo == 'Perfil'}
-                             ? 'fas fa-id-card me-2'
-                             : (${p.modulo.strNombreModulo == 'Módulo'}
-                                ? 'fas fa-cubes me-2'
-                                : (${p.modulo.strNombreModulo == 'Permisos-Perfil'}
-                                   ? 'fas fa-key me-2'
-                                   : 'fas fa-users me-2'))">
-                                    </i>
-                                    <span th:text="${p.modulo.strNombreModulo}"></span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Principal 1 -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-th-large me-1"></i>Principal 1
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/principal/1-1">Principal 1.1</a></li>
-                            <li><a class="dropdown-item" href="/principal/1-2">Principal 1.2</a></li>
-                        </ul>
-                    </li>
-
-                    <!-- Principal 2 -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-th me-1"></i>Principal 2
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/principal/2-1">Principal 2.1</a></li>
-                            <li><a class="dropdown-item" href="/principal/2-2">Principal 2.2</a></li>
-                        </ul>
-                    </li>
-                </ul>
 
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
