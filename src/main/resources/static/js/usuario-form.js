@@ -81,8 +81,7 @@ async function cargarDatosUsuario() {
 
         // Mostrar imagen actual (DOM)
         if (u.strImagen) {
-            document.getElementById('imgPreview').src =
-                `/uploads/usuarios/${u.strImagen}`;
+            document.getElementById('imgPreview').src = u.strImagen;
         }
     } catch { mostrarAlerta('Error de conexión al cargar el usuario'); }
 }

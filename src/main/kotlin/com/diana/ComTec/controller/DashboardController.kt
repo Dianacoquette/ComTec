@@ -2,6 +2,7 @@ package com.diana.ComTec.controller
 
 import com.diana.ComTec.repository.MenuRepository
 import com.diana.ComTec.repository.PermisosPerfilRepository
+import com.diana.ComTec.service.CloudinaryService
 import com.diana.ComTec.service.JwtService
 import com.diana.ComTec.service.UsuarioService
 import jakarta.servlet.http.HttpServletRequest
@@ -14,7 +15,8 @@ class DashboardController(
     private val jwtService: JwtService,
     private val usuarioService: UsuarioService,
     private val permisosPerfilRepository: PermisosPerfilRepository,
-    private val menuRepository: MenuRepository
+    private val menuRepository: MenuRepository,
+    private val cloudinaryService: CloudinaryService
 ) {
 
     @GetMapping("/dashboard")
@@ -78,6 +80,12 @@ class DashboardController(
         model.addAttribute("menuPrincipal2", menuPrincipal2)
         model.addAttribute("rutasModulo",    rutasModulo)
         model.addAttribute("tarjetas",       tarjetas)
+        // Construir URL de imagen para la vista
+        val imagenUrl = if (!usuario.strImagen.isNullOrBlank())
+            cloudinaryService.construirUrl(usuario.strImagen!!)
+        else null
+
+        model.addAttribute("imagenUsuarioUrl", imagenUrl)
 
         return "dashboard"
     }

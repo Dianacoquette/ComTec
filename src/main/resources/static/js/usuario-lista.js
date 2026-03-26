@@ -2,26 +2,26 @@
 // ║      USUARIO LISTA - Fetch API + DOM             ║
 // ╚══════════════════════════════════════════════════╝
 
-const tablaUsuario         = document.getElementById('tablaUsuario');
-const paginacion           = document.getElementById('paginacion');
-const infoRegistros        = document.getElementById('infoRegistros');
-const inputBuscar          = document.getElementById('inputBuscar');
-const btnBuscar            = document.getElementById('btnBuscar');
-const btnLimpiar           = document.getElementById('btnLimpiar');
+const tablaUsuario = document.getElementById('tablaUsuario');
+const paginacion = document.getElementById('paginacion');
+const infoRegistros = document.getElementById('infoRegistros');
+const inputBuscar = document.getElementById('inputBuscar');
+const btnBuscar = document.getElementById('btnBuscar');
+const btnLimpiar = document.getElementById('btnLimpiar');
 const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
-const modalDetalle         = new bootstrap.Modal(document.getElementById('modalDetalle'));
-const modalEliminar        = new bootstrap.Modal(document.getElementById('modalEliminar'));
-const toastEl              = new bootstrap.Toast(document.getElementById('toast'));
+const modalDetalle = new bootstrap.Modal(document.getElementById('modalDetalle'));
+const modalEliminar = new bootstrap.Modal(document.getElementById('modalEliminar'));
+const toastEl = new bootstrap.Toast(document.getElementById('toast'));
 
-let paginaActual    = 0;
+let paginaActual = 0;
 let terminoBusqueda = '';
-let idEliminar      = null;
+let idEliminar = null;
 
 // ══════════════════════════════════════════════════════
 // FETCH API - Cargar tabla
 // ══════════════════════════════════════════════════════
 async function cargarUsuarios(page = 0, buscar = '') {
-    paginaActual    = page;
+    paginaActual = page;
     terminoBusqueda = buscar;
 
     tablaUsuario.innerHTML = `
@@ -32,9 +32,9 @@ async function cargarUsuarios(page = 0, buscar = '') {
         </tr>`;
 
     try {
-        const url      = `/seguridad/usuario/api?page=${page}&buscar=${encodeURIComponent(buscar)}`;
+        const url = `/seguridad/usuario/api?page=${page}&buscar=${encodeURIComponent(buscar)}`;
         const response = await fetch(url);
-        const result   = await response.json();
+        const result = await response.json();
 
         if (!result.success) { mostrarToast('Error al cargar', 'danger'); return; }
 
@@ -42,40 +42,37 @@ async function cargarUsuarios(page = 0, buscar = '') {
 
         // ── Filas (DOM) ─────────────────────────────
         tablaUsuario.innerHTML = content.length === 0
-    ? `<tr><td colspan="7" class="text-center py-4 text-muted">
+            ? `<tr><td colspan="7" class="text-center py-4 text-muted">
            <i class="fas fa-inbox fa-2x d-block mb-2"></i>Sin registros
        </td></tr>`
-    : content.map((u, i) => {
+            : content.map((u, i) => {
 
-        const btnDetalle = PERM.detalle
-            ? `<button class="btn btn-info btn-sm btn-action"
+                const btnDetalle = PERM.detalle
+                    ? `<button class="btn btn-info btn-sm btn-action"
                        onclick="verDetalle(${u.id})" title="Detalle">
                    <i class="fas fa-eye"></i>
                </button>` : '';
 
-        const btnEditar = PERM.editar
-            ? `<a href="/seguridad/usuario/editar/${u.id}"
+                const btnEditar = PERM.editar
+                    ? `<a href="/seguridad/usuario/editar/${u.id}"
                   class="btn btn-warning btn-sm btn-action" title="Editar">
                    <i class="fas fa-edit"></i>
                </a>` : '';
 
-        const btnEliminar = PERM.eliminar
-            ? `<button class="btn btn-danger btn-sm btn-action"
+                const btnEliminar = PERM.eliminar
+                    ? `<button class="btn btn-danger btn-sm btn-action"
                        onclick="confirmarEliminar(${u.id},'${escapeHtml(u.strNombreUsuario)}')"
                        title="Eliminar">
                    <i class="fas fa-trash"></i>
                </button>` : '';
 
-        return `
+                return `
             <tr>
                 <td>${currentPage * 5 + i + 1}</td>
                 <td>
-                    <img src="${u.strImagen
-                        ? '/uploads/usuarios/' + u.strImagen
-                        : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-                         alt="foto"
-                         class="rounded-circle"
-                         style="width:40px;height:40px;object-fit:cover;">
+                   <img src="${u.strImagen || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+                    alt="foto" class="rounded-circle"
+                    style="width:40px;height:40px;object-fit:cover;">
                 </td>
                 <td>${escapeHtml(u.strNombreUsuario)}</td>
                 <td>${escapeHtml(u.strNombrePerfil)}</td>
@@ -91,7 +88,7 @@ async function cargarUsuarios(page = 0, buscar = '') {
                     ${btnEliminar}
                 </td>
             </tr>`;
-    }).join('');
+            }).join('');
 
         infoRegistros.textContent =
             `Mostrando ${content.length} de ${totalElements} registro(s)`;
@@ -111,7 +108,7 @@ async function cargarUsuarios(page = 0, buscar = '') {
 function renderPaginacion(currentPage, totalPages) {
     if (totalPages <= 1) { paginacion.innerHTML = ''; return; }
     const esPrimera = currentPage === 0;
-    const esUltima  = currentPage === totalPages - 1;
+    const esUltima = currentPage === totalPages - 1;
     paginacion.innerHTML = `
         <li class="page-item ${esPrimera ? 'disabled' : ''}">
             <a class="page-link" href="#"
@@ -142,23 +139,22 @@ function renderPaginacion(currentPage, totalPages) {
 async function verDetalle(id) {
     try {
         const response = await fetch(`/seguridad/usuario/api/${id}`);
-        const result   = await response.json();
+        const result = await response.json();
         if (!result.success) return;
         const u = result.data;
 
         // Llenar DOM del modal
-        document.getElementById('detalleId').textContent      = u.id;
+        document.getElementById('detalleId').textContent = u.id;
         document.getElementById('detalleUsuario').textContent = u.strNombreUsuario;
-        document.getElementById('detallePerfil').textContent  = u.strNombrePerfil;
-        document.getElementById('detalleCorreo').textContent  = u.strCorreo || '—';
+        document.getElementById('detallePerfil').textContent = u.strNombrePerfil;
+        document.getElementById('detalleCorreo').textContent = u.strCorreo || '—';
         document.getElementById('detalleCelular').textContent = u.strNumeroCelular || '—';
-        document.getElementById('detalleEstado').innerHTML    =
+        document.getElementById('detalleEstado').innerHTML =
             `<span class="badge ${u.strEstado === 'Activo' ? 'bg-success' : 'bg-danger'}">
                 ${u.strEstado}
             </span>`;
         document.getElementById('detalleImagen').src = u.strImagen
-            ? `/uploads/usuarios/${u.strImagen}`
-            : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
         modalDetalle.show();
     } catch { mostrarToast('Error al obtener detalle', 'danger'); }
@@ -178,12 +174,12 @@ btnConfirmarEliminar.addEventListener('click', async () => {
     btnConfirmarEliminar.disabled = true;
     try {
         const response = await fetch(`/seguridad/usuario/api/${idEliminar}`, { method: 'DELETE' });
-        const result   = await response.json();
+        const result = await response.json();
         modalEliminar.hide();
         mostrarToast(result.message, result.success ? 'success' : 'danger');
         if (result.success) cargarUsuarios(paginaActual, terminoBusqueda);
     } catch { mostrarToast('Error de conexión', 'danger'); }
-    finally  { btnConfirmarEliminar.disabled = false; idEliminar = null; }
+    finally { btnConfirmarEliminar.disabled = false; idEliminar = null; }
 });
 
 // ── Búsqueda ──────────────────────────────────────────

@@ -156,7 +156,8 @@ class UsuarioController(
             return ResponseEntity.badRequest()
                 .body(ApiResponse(false, "No se seleccionó ningún archivo"))
 
-        val extension = file.originalFilename?.substringAfterLast('.', "")?.lowercase() ?: ""
+        val extension = file.originalFilename
+            ?.substringAfterLast('.', "")?.lowercase() ?: ""
         if (extension !in listOf("jpg", "jpeg", "png", "gif", "webp"))
             return ResponseEntity.badRequest()
                 .body(ApiResponse(false, "Solo se permiten imágenes (jpg, png, gif, webp)"))
@@ -165,12 +166,19 @@ class UsuarioController(
             return ResponseEntity.badRequest()
                 .body(ApiResponse(false, "La imagen no debe superar los 5MB"))
 
-        val nombreArchivo = usuarioService.subirImagen(id, file)
-            ?: return ResponseEntity.notFound().build()
+        return try {
+            val nombreArchivo = usuarioService.subirImagen(id, file)
+                ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(ApiResponse(true, "Imagen subida correctamente",
-            mapOf("nombreArchivo" to nombreArchivo,
-                "url" to "/uploads/usuarios/$nombreArchivo")))
+            ResponseEntity.ok(
+                ApiResponse(true, "Imagen subida correctamente",
+                    mapOf("nombreArchivo" to nombreArchivo)
+                )
+            )
+        } catch (e: Exception) {
+            ResponseEntity.status(500)
+                .body(ApiResponse(false, "Error al subir imagen: ${e.message}"))
+        }
     }
 
     // ── API: Listar perfiles (para el select) ─────────

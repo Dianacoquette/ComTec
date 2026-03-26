@@ -68,6 +68,9 @@ dependencies {
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation(kotlin("stdlib-jdk8"))
+
+	//cloudinary
+	implementation("com.cloudinary:cloudinary-http45:1.39.0")
 }
 
 kotlin {

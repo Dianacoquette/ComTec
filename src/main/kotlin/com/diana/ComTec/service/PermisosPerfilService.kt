@@ -17,8 +17,14 @@ class PermisosPerfilService(
     private val moduloRepository: ModuloRepository
 ) {
 
-    fun listar(page: Int, size: Int = 5): Page<PermisosPerfil> =
-        permisosPerfilRepository.findAll(PageRequest.of(page, size))
+    // Listar con filtro opcional por perfil
+    fun listar(page: Int, perfilFiltro: Int = 0, size: Int = 5): Page<PermisosPerfil> {
+        val pageable = PageRequest.of(page, size)
+        return if (perfilFiltro > 0)
+            permisosPerfilRepository.findByPerfilId(perfilFiltro, pageable)
+        else
+            permisosPerfilRepository.findAll(pageable)
+    }
 
     fun obtener(id: Int): PermisosPerfil? =
         permisosPerfilRepository.findById(id).orElse(null)
@@ -60,6 +66,20 @@ class PermisosPerfilService(
         )
     }
 
+    // Toggle individual de un permiso
+    fun togglePermiso(id: Int, campo: String, valor: Boolean): PermisosPerfil? {
+        val existente = permisosPerfilRepository.findById(id).orElse(null) ?: return null
+        val actualizado = when (campo) {
+            "bitAgregar"  -> existente.copy(bitAgregar  = valor)
+            "bitEditar"   -> existente.copy(bitEditar   = valor)
+            "bitConsulta" -> existente.copy(bitConsulta = valor)
+            "bitEliminar" -> existente.copy(bitEliminar = valor)
+            "bitDetalle"  -> existente.copy(bitDetalle  = valor)
+            else          -> return null
+        }
+        return permisosPerfilRepository.save(actualizado)
+    }
+
     fun eliminar(id: Int): Boolean {
         if (!permisosPerfilRepository.existsById(id)) return false
         permisosPerfilRepository.deleteById(id)
@@ -84,4 +104,59 @@ class PermisosPerfilService(
 
     fun listarPerfiles() = perfilRepository.findAll()
         .map { mapOf("id" to it.id, "nombre" to it.strNombrePerfil) }
+
+    fun listarModulosConPermisos(perfilFiltro: Int, page: Int, size: Int = 5): Map<String, Any> {
+        val todosLosModulos = moduloRepository.findAll()
+        val permisosExistentes = if (perfilFiltro > 0)
+            permisosPerfilRepository.findByPerfilId(perfilFiltro)
+        else
+            emptyList()
+
+        // Cruzar módulos con permisos existentes
+        val filas = todosLosModulos.map { modulo ->
+            val permiso = permisosExistentes.find { it.modulo.id == modulo.id }
+            mapOf(
+                "idModulo"        to modulo.id,
+                "strNombreModulo" to modulo.strNombreModulo,
+                "idPermiso"       to (permiso?.id ?: 0),
+                "idPerfil"        to perfilFiltro,        // ← este faltaba
+                "bitAgregar"      to (permiso?.bitAgregar  ?: false),
+                "bitEditar"       to (permiso?.bitEditar   ?: false),
+                "bitConsulta"     to (permiso?.bitConsulta ?: false),
+                "bitEliminar"     to (permiso?.bitEliminar ?: false),
+                "bitDetalle"      to (permiso?.bitDetalle  ?: false),
+                "tienePermiso"    to (permiso != null)
+            )
+        }
+
+        // Paginación manual
+        val totalElements = filas.size
+        val totalPages    = if (totalElements == 0) 1 else (totalElements + size - 1) / size
+        val fromIndex     = page * size
+        val toIndex       = minOf(fromIndex + size, totalElements)
+        val content       = if (fromIndex >= totalElements) emptyList() else filas.subList(fromIndex, toIndex)
+
+        return mapOf(
+            "content"       to content,
+            "totalPages"    to totalPages,
+            "totalElements" to totalElements,
+            "currentPage"   to page
+        )
+    }
+
+    // Crear permiso desde cero (cuando el registro no existe)
+    fun crearDesdeToggle(idPerfil: Int, idModulo: Int, campo: String, valor: Boolean): PermisosPerfil? {
+        val perfil = perfilRepository.findById(idPerfil).orElse(null) ?: return null
+        val modulo = moduloRepository.findById(idModulo).orElse(null) ?: return null
+        val nuevo = PermisosPerfil(
+            perfil      = perfil,
+            modulo      = modulo,
+            bitAgregar  = campo == "bitAgregar"  && valor,
+            bitEditar   = campo == "bitEditar"   && valor,
+            bitConsulta = campo == "bitConsulta" && valor,
+            bitEliminar = campo == "bitEliminar" && valor,
+            bitDetalle  = campo == "bitDetalle"  && valor
+        )
+        return permisosPerfilRepository.save(nuevo)
+    }
 }

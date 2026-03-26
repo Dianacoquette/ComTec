@@ -25,7 +25,8 @@ class UsuarioService(
     private val usuarioRepository: UsuarioRepository,
     private val perfilRepository: PerfilRepository,
     private val estadoUsuarioRepository: EstadoUsuarioRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val cloudinaryService: CloudinaryService
 ) : UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails {
@@ -95,25 +96,16 @@ class UsuarioService(
     fun subirImagen(id: Int, file: MultipartFile): String? {
         val usuario = usuarioRepository.findById(id).orElse(null) ?: return null
 
-        // Crear directorio si no existe
-        val uploadDir = Paths.get("uploads/usuarios")
-        if (!Files.exists(uploadDir)) Files.createDirectories(uploadDir)
-
-        // Generar nombre único
-        val extension = file.originalFilename?.substringAfterLast('.', "jpg") ?: "jpg"
-        val nombreArchivo = "${UUID.randomUUID()}.$extension"
-        val rutaArchivo = uploadDir.resolve(nombreArchivo)
-
-        // Guardar archivo
-        Files.copy(file.inputStream, rutaArchivo)
-
-        // Eliminar imagen anterior si existe
+        // Eliminar imagen anterior de Cloudinary si existe
         if (!usuario.strImagen.isNullOrBlank()) {
-            val anterior = uploadDir.resolve(usuario.strImagen!!)
-            if (Files.exists(anterior)) Files.delete(anterior)
+            cloudinaryService.eliminarImagen(usuario.strImagen!!)
         }
 
-        // Actualizar en BD
+        // Subir nueva imagen — public_id es el nombre único por usuario
+        val publicId    = "usuario_$id"
+        val nombreArchivo = cloudinaryService.subirImagen(file, publicId)
+
+        // Guardar SOLO el nombre en BD (no la URL completa)
         usuarioRepository.save(usuario.copy(strImagen = nombreArchivo))
         return nombreArchivo
     }
@@ -127,7 +119,10 @@ class UsuarioService(
         strEstado        = u.estadoUsuario.strEstado,
         strCorreo        = u.strCorreo,
         strNumeroCelular = u.strNumeroCelular,
-        strImagen        = u.strImagen
+        // Si tiene imagen construye la URL, si no null
+        strImagen        = if (!u.strImagen.isNullOrBlank())
+            cloudinaryService.construirUrl(u.strImagen!!)
+        else null
     )
 
     fun listarPerfiles(): List<Map<String, Any>> =
